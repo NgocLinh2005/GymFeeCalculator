@@ -28,21 +28,11 @@ public class GymFeeCalculator {
         if (!isValidDoTuoi(doTuoi))         return -1;
         if (!isValidCoSinhVien(coSinhVien)) return -1;
 
-        // --- Bước 2: Tính giá gốc ---
-        long donGia = getDonGia(loaiGoi);
-        double giaGoc = (double) donGia * soThang;
+        double phiThuc = getDonGia(loaiGoi) * soThang
+                * getHeSoThang(soThang)
+                * (1 - getGiamTuoi(doTuoi))
+                * (1 - getGiamSinhVien(coSinhVien, doTuoi));
 
-        // --- Bước 3: Hệ số ưu đãi theo số tháng ---
-        double heSoThang = getHeSoThang(soThang);
-
-        // --- Bước 4: Tỉ lệ giảm giá theo tuổi ---
-        double giamTuoi = getGiamTuoi(doTuoi);
-
-        // --- Bước 5: Tỉ lệ giảm giá sinh viên (có ràng buộc chéo với doTuoi) ---
-        double giamSinhVien = getGiamSinhVien(coSinhVien, doTuoi);
-
-        // --- Bước 6: Tính phí cuối, làm tròn xuống nghìn đồng ---
-        double phiThuc = giaGoc * heSoThang * (1 - giamTuoi) * (1 - giamSinhVien);
         return lamTronNghinDong(phiThuc);
     }
 
@@ -76,7 +66,7 @@ public class GymFeeCalculator {
             if (ketQua == -1) {
                 System.out.println("Loi: Thong tin nhap vao khong hop le!");
             } else {
-                // Hiển thị số tiền bình thường theo ý bạn, hoặc dùng %,d để dễ đọc hơn
+                // Hiển thị số tiền
                 System.out.println("Tong phi can thanh toan: " + ketQua + " VND");
             }
             System.out.println("------------------------------------");
