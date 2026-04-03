@@ -8,16 +8,16 @@ class GymFeeCalculatorTest {
     @ParameterizedTest(name = "Lần {index}: Goi={0}, Tháng={1}, Tuổi={2}, SV={3} => Kỳ vọng={4}")
     @DisplayName("Kiểm thử giá trị biên cho hệ thống tính phí Gym")
     @CsvSource({
-            // --- Kiểm thử biên ---
+            // ---I Kiểm thử biên ---
 
-            // --- Kiểm thử loaiGoi (Biên 1, 2, 3) ---
+            // ---1 Kiểm thử loaiGoi (Biên 1, 2, 3) ---
             "0, 6, 30, 0, -1",          // Sai: Gói < 1
             "1, 6, 30, 0, 1530000",     // Đúng: 300k * 6 * 0.85
             "2, 6, 30, 0, 2550000",     // Đúng: 500k * 6 * 0.85
             "3, 6, 30, 0, 4590000",     // Đúng: 900k * 6 * 0.85
             "4, 6, 30, 0, -1",          // Sai: Gói > 3
 
-            // --- Kiểm thử soThang (Biên 1, 12 và các mốc giảm giá) ---
+            // ---2 Kiểm thử soThang (Biên 1, 12 và các mốc giảm giá) ---
             "2, 0, 30, 0, -1",          // Sai: Tháng < 1
             "2, 1, 30, 0, 500000",      // Đúng: 1 tháng (hệ số 1.0)
             "2, 2, 30, 0, 1000000",     // Đúng: 2 tháng (hệ số 1.0)
@@ -26,7 +26,7 @@ class GymFeeCalculatorTest {
             "2, 12, 30, 0, 5100000",    // Đúng: 12 tháng (hệ số 0.85)
             "2, 13, 30, 0, -1",         // Sai: Tháng > 12
 
-            // --- Kiểm thử doTuoi (Biên 15, 17, 18, 55, 56, 60) ---
+            // ---3 Kiểm thử doTuoi (Biên 15, 17, 18, 55, 56, 60) ---
             "2, 6, 14, 0, -1",          // Sai: Tuổi < 15
             "2, 6, 15, 0, 2295000",     // Đúng: 15 tuổi (giảm 10%)
             "2, 6, 16, 0, 2295000",     // Đúng: 16 tuổi (giảm 10%)
@@ -40,13 +40,13 @@ class GymFeeCalculatorTest {
             "2, 6, 60, 0, 2167000",     // Đúng: 60 tuổi (giảm 15% - làm tròn xuống)
             "2, 6, 61, 0, -1",          // Sai: Tuổi > 60
 
-            // --- Kiểm thử coSinhVien ---
+            // ---4 Kiểm thử coSinhVien ---
             "2, 6, 30, -1, -1",         // Sai: Giá trị không hợp lệ
             "2, 6, 30, 0, 2550000",     // Đúng: Không có thẻ SV
             "2, 6, 30, 1, 2550000",     // Đúng: Có thẻ SV nhưng tuổi 30 (không được giảm)
             "2, 6, 30, 2, -1",           // Sai: Giá trị không hợp lệ
 
-            //---Kiêm thử bảng quyết định
+            //---II Kiêm thử bảng quyết định
             "1, 1, 20, 0, 300000",   // Gói 1, 1 tháng, ko giảm
             "1, 4, 20, 0, 1140000",  // Gói 1, 4 tháng (0.95)
             "1, 8, 22, 1, 1836000",  // Gói 1, 8 tháng (0.85), SV (0.9)
@@ -65,8 +65,20 @@ class GymFeeCalculatorTest {
             "0, 6, 30, 0, -1",       // Gói 0 (ko tồn tại)
             "2, 0, 30, 0, -1",       // Tháng 0
             "2, 6, 14, 0, -1",       // 14 tuổi (quá trẻ)
-            "2, 6, 30, 2, -1"        // SV = 2 (sai định dạng)
+            "2, 6, 30, 2, -1",        // SV = 2 (sai định dạng)
+
+
+            // ---III KIỂM THỬ C2 ---
+            "1, 2, 15, 1, 540000",      // TC1 - Gói 1, 2th (1.0), Tuổi 15 (0.9), SV (0.9)
+            "2, 4, 20, 1, 1710000",     // TC2 - Gói 2, 4th (0.95), SV (0.9)
+            "3, 6, 58, 0, 3901000",     // TC3 - Gói 3, 6th (0.85), Tuổi 58 (0.85)
+            "0, 3, 20, 0, -1",          // TC4 - Gói không hợp lệ
+            "1, 13, 20, 0, -1",         // TC5 - Tháng không hợp lệ
+            "1, 3, 14, 0, -1",          // TC6 - Tuổi không hợp lệ
+            "1, 3, 20, 2, -1"           // TC7 - SV không hợp lệ
+
     })
+
     void testTinhPhiGym(int loaiGoi, int soThang, int doTuoi, int coSinhVien, long expected) {
         long actual = GymFeeCalculator.tinhPhiDangKy(loaiGoi, soThang, doTuoi, coSinhVien);
         assertEquals(expected, actual,
