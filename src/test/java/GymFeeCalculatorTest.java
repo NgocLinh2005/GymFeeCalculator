@@ -9,7 +9,6 @@ class GymFeeCalculatorTest {
     @DisplayName("Kiểm thử giá trị biên cho hệ thống tính phí Gym")
     @CsvSource({
             // ---I Kiểm thử biên ---
-
             // ---1 Kiểm thử loaiGoi (Biên 1, 2, 3) ---
             "0, 6, 30, 0, -1",          // Sai: Gói < 1
             "1, 6, 30, 0, 1530000",     // Đúng: 300k * 6 * 0.85
@@ -75,8 +74,34 @@ class GymFeeCalculatorTest {
             "0, 3, 20, 0, -1",          // TC4 - Gói không hợp lệ
             "1, 13, 20, 0, -1",         // TC5 - Tháng không hợp lệ
             "1, 3, 14, 0, -1",          // TC6 - Tuổi không hợp lệ
-            "1, 3, 20, 2, -1"           // TC7 - SV không hợp lệ
+            "1, 3, 20, 2, -1",          // TC7 - SV không hợp lệ
 
+
+            // --- II. All-Uses Coverage ---
+
+            // 1. Cover p-use (fail từng điều kiện → node 1→4)
+            "4, 6, 30, 0, -1",          // fail node 1 (loaiGoi)
+            "1, 13, 30, 0, -1",         // fail node 2 (soThang)
+            "1, 6, 14, 0, -1",          // fail node 3 (doTuoi)
+            "1, 6, 30, 2, -1",          // fail node 4 (coSinhVien)
+
+            // 2. Base case hợp lệ (cover full path + nhiều c-use)
+            "1, 1, 30, 0, 300000",      // đi full path, hệ số = 1.0
+
+            // 3. Cover getHeSoThang (node 6 – 3 nhánh)
+            "1, 3, 30, 0, 855000",      // 3–5 tháng → 0.95
+            "1, 6, 30, 0, 1530000",     // >5 tháng → 0.85
+
+            // 4. Cover getGiamTuoi (node 7 – 3 nhánh)
+            "1, 6, 17, 0, 1377000",     // ≤17 → giảm 10%
+            "1, 6, 56, 0, 1300000",     // >55 → giảm 15%
+
+            // 5. Cover getGiamSinhVien (node 8 – điều kiện kết hợp)
+            "1, 6, 22, 1, 1377000",     // SV hợp lệ (18–25)
+            "1, 6, 17, 1, 1377000",     // SV nhưng không đủ tuổi → không giảm
+
+            // 6. Case tổng hợp mạnh nhất (cover toàn bộ data flow)
+            "3, 12, 22, 1, 8262000"     // VIP + 12 tháng + SV → full pipeline
     })
 
     void testTinhPhiGym(int loaiGoi, int soThang, int doTuoi, int coSinhVien, long expected) {
